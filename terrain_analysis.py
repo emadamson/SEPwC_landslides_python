@@ -3,36 +3,23 @@
 import numpy as np
 
 def convert_to_rasterio(raster_data, template_raster):
-  "reading raster data into numpy array"
-  'import raster data'
-  'output raster file and numpy array'
-  b1= template_raster.read(1)
-  np.copyto(raster_data, b1)
+ 
 
-  return template_raster,b1
+  return 
 
 
 def extract_values_from_raster(raster, shape_object):
-    coordinate_list = []
-    for i in enumerate(shape_object):
-        x_coordinate=shape.x
-        y_coordinate=shape.y
-        coordinate_list.append((x_coordinate, y_coordinate))
-    values = raster.sample(coordinate_list)
+   
 
-    current_values = []
-    for i in values:
-        current_values.append(i[0])
-
-    return current_values
-
+    return 
 
 def make_classifier(x, y, verbose=False):
 
-    return
+
+    return 
 
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
-
+ 
     return
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
