@@ -1,3 +1,5 @@
+'insert copywrite here'
+
 import numpy as np
 
 def convert_to_rasterio(raster_data, template_raster):
@@ -6,13 +8,23 @@ def convert_to_rasterio(raster_data, template_raster):
   'output raster file and numpy array'
   b1= template_raster.read(1)
   np.copyto(raster_data, b1)
-  
-  return template_raster.read(1)
+
+  return template_raster,b1
 
 
 def extract_values_from_raster(raster, shape_object):
+    coordinate_list = []
+    for i in enumerate(shape_object):
+        x_coordinate=shape.x
+        y_coordinate=shape.y
+        coordinate_list.append((x_coordinate, y_coordinate))
+    values = raster.sample(coordinate_list)
 
-    return
+    current_values = []
+    for i in values:
+        current_values.append(i[0])
+
+    return current_values
 
 
 def make_classifier(x, y, verbose=False):
