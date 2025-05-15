@@ -1,9 +1,13 @@
-import argparse
-
+import numpy as np
 
 def convert_to_rasterio(raster_data, template_raster):
+  "reading raster data into numpy array"
+  'import raster data'
+  'output raster file and numpy array'
+  b1= template_raster.read(1)
+  np.copyto(raster_data, b1)
   
-    return
+  return template_raster.read(1)
 
 
 def extract_values_from_raster(raster, shape_object):
