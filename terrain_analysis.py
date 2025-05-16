@@ -28,7 +28,7 @@ def extract_values_from_raster(raster, shape_object):
     current_values = []
     for value in values:
         current_values.append(value[0])
-    
+ 
     return current_values
 
 
