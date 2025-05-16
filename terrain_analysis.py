@@ -1,4 +1,6 @@
 'insert copywrite here'
+
+
 import pandas as pd
 import geopandas as gpd
 import rasterio
@@ -17,24 +19,22 @@ def convert_to_rasterio(raster_data, template_raster):
 
 def extract_values_from_raster(raster, shape_object):
     coordinate_list = []
-    for i in enumerate(shape_object):
+    for shape in shape_object:  # Corrected loop variable
         x_coordinate = shape.x
         y_coordinate = shape.y
         coordinate_list.append((x_coordinate, y_coordinate))
     values = raster.sample(coordinate_list)
 
     current_values = []
-    for i in values:
-        current_values.append(i[0])
+    for value in values:
+        current_values.append(value[0])
     
     return current_values
 
 
-
 def make_classifier(x, y, verbose=False):
-'using random forest classifier'
-
-Random_Forest = RandomForestClassifier(verbose=verbose)
+    # Using random forest classifier
+    Random_Forest = RandomForestClassifier(verbose=verbose)
     Random_Forest.fit(x, y)
     return Random_Forest
 
