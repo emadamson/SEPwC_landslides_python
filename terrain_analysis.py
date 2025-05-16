@@ -3,6 +3,7 @@ import pandas as pd
 import geopandas as gpd
 import rasterio
 from rasterio import features
+from sklearn.ensemble import RandomForestClassifier
 
 
 def convert_to_rasterio(raster_data, template_raster):
@@ -15,7 +16,7 @@ def convert_to_rasterio(raster_data, template_raster):
   return template_raster,b1
 
 def extract_values_from_raster(raster, shape_object):
-        coordinate_list = []
+    coordinate_list = []
     for i in enumerate(shape_object):
         x_coordinate = shape.x
         y_coordinate = shape.y
@@ -31,9 +32,11 @@ def extract_values_from_raster(raster, shape_object):
 
 
 def make_classifier(x, y, verbose=False):
+'using random forest classifier'
 
-
-    return 
+Random_Forest = RandomForestClassifier(verbose=verbose)
+    Random_Forest.fit(x, y)
+    return Random_Forest
 
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
  
