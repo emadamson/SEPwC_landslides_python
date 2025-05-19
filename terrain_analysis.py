@@ -56,8 +56,19 @@ def make_classifier(x, y, verbose=False):
     return Random_Forest
 
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
- 
-    return
+  
+    stacked_data = np.stack([topo, geo, lc, dist_fault, slope], axis=-1)
+    rows, cols, bands = stacked_data.shape
+    reshaped_data = stacked_data.reshape(-1, bands)  # Reshape to (num_pixels, num_features)
+
+    # Predict probabilities using the classifier
+    probabilities = classifier.predict_proba(reshaped_data)[:, 1]  
+
+   
+    prob_raster = probabilities.reshape(rows, cols)
+
+    return prob_raster
+    
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
 
