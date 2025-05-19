@@ -116,7 +116,16 @@ def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
     return data
     
 def distance_from_fault(faults, shape):
+    """
+    Calculates the minimum distance from each pixel in the raster to the nearest fault.
 
+    Parameters:
+    faults (GeoDataFrame): A GeoPandas GeoDataFrame containing fault geometries.
+    shape (rasterio.io.DatasetReader): A rasterio dataset representing the raster grid.
+
+    Returns:
+    numpy.ndarray: A NumPy array representing the distance raster.
+    """
     # Ensure the shape object has a valid shape attribute
     if not hasattr(shape, "shape"):
         raise ValueError("The 'shape' parameter must have a 'shape' attribute.")
