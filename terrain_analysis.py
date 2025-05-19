@@ -103,8 +103,12 @@ def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
     
 def distance_from_fault(faults, shape):
    
-    # Create a distance raster
-    distance_raster = np.zeros(shape.shape, dtype=np.float32)
+    # Ensure the shape object has a valid shape attribute
+    if not hasattr(shape, "shape"):
+        raise ValueError("The 'shape' parameter must have a 'shape' attribute.")
+
+    # Create a distance raster initialized with large values
+    distance_raster = np.full(shape.shape, np.inf, dtype=np.float32)
 
     # Iterate through each fault line and calculate distances
     for _, fault in faults.iterrows():
@@ -115,8 +119,10 @@ def distance_from_fault(faults, shape):
         distances = shape.distance(fault_geom)
         distance_raster = np.minimum(distance_raster, distances)
 
-    return distance_raster
+    # Replace infinite values with a default (e.g., 0 or max distance)
+    distance_raster[np.isinf(distance_raster)] = 0
 
+    return distance_raster
 def main():
 
 
