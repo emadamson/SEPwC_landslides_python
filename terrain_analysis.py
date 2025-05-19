@@ -15,9 +15,16 @@ from scipy.ndimage import distance_transform_edt
 
 
 def convert_to_rasterio(raster_data, template_raster):
-  "reading raster data into numpy array"
-  'import raster data'
-  'output raster file and numpy array'
+    """
+    Reads raster data from a template raster and updates the provided numpy array.
+
+    Parameters:
+    raster_data (numpy.ndarray): A numpy array to store the raster data.
+    template_raster (rasterio.io.DatasetReader): An open rasterio dataset to read data from.
+
+    Returns:
+    numpy.ndarray: The updated numpy array containing the raster data.
+    """
     # Read the first band of the template raster
     band_data = template_raster.read(1)
     
