@@ -109,7 +109,11 @@ def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
     return data
     
 def distance_from_fault(faults, shape):
-   
+
+    # Ensure the shape object has a valid shape attribute
+    if not hasattr(shape, "shape"):
+        raise ValueError("The 'shape' parameter must have a 'shape' attribute.")
+
     # Create a binary mask for fault locations
     raster_shape = shape.shape
     fault_mask = features.rasterize(
