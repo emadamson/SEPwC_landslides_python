@@ -18,17 +18,34 @@ def convert_to_rasterio(raster_data, template_raster):
   return template_raster,b1
 
 def extract_values_from_raster(raster, shape_object):
+    """
+    Extracts raster values at the coordinates of the given shapes.
+
+    Parameters:
+    raster (rasterio.io.DatasetReader): The raster file to sample values from.
+    shape_object (iterable): A collection of geometries (e.g., GeoPandas GeoSeries or GeoDataFrame).
+
+    Returns:
+    list: A list of raster values corresponding to the input shapes.
+    """
     coordinate_list = []
-    for shape in shape_object:  # Corrected loop variable
-        x_coordinate = shape.x
-        y_coordinate = shape.y
+
+    # Extract coordinates from each shape
+    for shape in shape_object:
+        if hasattr(shape, "geometry"):  # If shape is a GeoPandas row
+            shape = shape.geometry
+        if shape.is_empty:
+            continue
+        # Get the coordinates of the shape's centroid (or use another method if needed)
+        x_coordinate, y_coordinate = shape.centroid.x, shape.centroid.y
         coordinate_list.append((x_coordinate, y_coordinate))
+
+    # Sample raster values at the extracted coordinates
     values = raster.sample(coordinate_list)
 
-    current_values = []
-    for value in values:
-        current_values.append(value[0])
- 
+    # Convert sampled values to a list
+    current_values = [value[0] for value in values]
+
     return current_values
 
 
