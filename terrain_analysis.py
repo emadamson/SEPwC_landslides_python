@@ -8,6 +8,8 @@ import rasterio
 from rasterio import features
 from sklearn.ensemble import RandomForestClassifier
 import argparse
+import scipy
+from scipy.ndimage import distance_transform_edt
 
 
 
@@ -16,10 +18,13 @@ def convert_to_rasterio(raster_data, template_raster):
   "reading raster data into numpy array"
   'import raster data'
   'output raster file and numpy array'
-  b1= template_raster.read(1)
-  np.copyto(raster_data, b1)
-
-  return template_raster,b1
+    # Read the first band of the template raster
+    band_data = template_raster.read(1)
+    
+    # Update the provided numpy array with the raster data
+    np.copyto(raster_data, band_data)
+    
+    return raster_data
 
 def extract_values_from_raster(raster, shape_object):
     """
@@ -33,8 +38,6 @@ def extract_values_from_raster(raster, shape_object):
     list: A list of raster values corresponding to the input shapes.
     """
     coordinate_list = []
-
-
     # Extract coordinates from each shape
     for shape in shape_object:
         if hasattr(shape, "geometry"):  # If shape is a GeoPandas row
@@ -97,7 +100,7 @@ def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
     landslide_raster = features.rasterize(
         [(geom, 1) for geom in landslides.geometry],
         out_shape=raster_shape,
-        transform=shape.affine,
+        transform=shape.transform,
         fill=0,
         dtype="int32"
     )
@@ -107,26 +110,22 @@ def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
     
 def distance_from_fault(faults, shape):
    
-    # Ensure the shape object has a valid shape attribute
-    if not hasattr(shape, "shape"):
-        raise ValueError("The 'shape' parameter must have a 'shape' attribute.")
+    # Create a binary mask for fault locations
+    raster_shape = shape.shape
+    fault_mask = features.rasterize(
+        [(geom, 1) for geom in faults.geometry],
+        out_shape=raster_shape,
+        transform=shape.transform,
+        fill=0,
+        dtype="int32"
+    )
 
-    # Create a distance raster initialized with large values
-    distance_raster = np.full(shape.shape, np.inf, dtype=np.float32)
-
-    # Iterate through each fault line and calculate distances
-    for _, fault in faults.iterrows():
-        fault_geom = fault.geometry
-        if fault_geom.is_empty:
-            continue
-        # Calculate distance from the fault line to each pixel
-        distances = shape.distance(fault_geom)
-        distance_raster = np.minimum(distance_raster, distances)
-
-    # Replace infinite values with a default (e.g., 0 or max distance)
-    distance_raster[np.isinf(distance_raster)] = 0
+    # Calculate the Euclidean distance transform
+    distance_raster = distance_transform_edt(fault_mask == 0)
 
     return distance_raster
+
+
 def main():
 
 
