@@ -18,10 +18,6 @@ def convert_to_rasterio(raster_data, template_raster):
     """
     Reads raster data from a template raster and updates the provided numpy array.
 
-    Parameters:
-    raster_data (numpy.ndarray): A numpy array to store the raster data.
-    template_raster (rasterio.io.DatasetReader): An open rasterio dataset to read data from.
-
     Returns:
     numpy.ndarray: The updated numpy array containing the raster data.
     """
@@ -36,10 +32,6 @@ def convert_to_rasterio(raster_data, template_raster):
 def extract_values_from_raster(raster, shape_object):
     """
     Extracts raster values at the coordinates of the given shapes.
-
-    Parameters:
-    raster (rasterio.io.DatasetReader): The raster file to sample values from.
-    shape_object (iterable): A collection of geometries (e.g., GeoPandas GeoSeries or GeoDataFrame).
 
     Returns:
     list: A list of raster values corresponding to the input shapes.
@@ -65,27 +57,43 @@ def extract_values_from_raster(raster, shape_object):
 
 
 def make_classifier(x, y, verbose=False):
-    # Using random forest classifier
+    
+     """
+    Using random forest classifier
+    Returns:
+    RandomForestClassifier: A trained Random Forest classifier that can be used for predictions.
+    """
     Random_Forest = RandomForestClassifier(verbose=verbose)
     Random_Forest.fit(x, y)
     return Random_Forest
 
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
-  
+    """
+    Generates a probability raster using input raster layers and a trained classifier.
+
+    Returns:
+    numpy.ndarray: A NumPy array representing the probability raster.
+    """
+    # Stack all input raster layers into a single 2D array (features for the classifier)
     stacked_data = np.stack([topo, geo, lc, dist_fault, slope], axis=-1)
     rows, cols, bands = stacked_data.shape
     reshaped_data = stacked_data.reshape(-1, bands)  # Reshape to (num_pixels, num_features)
 
     # Predict probabilities using the classifier
-    probabilities = classifier.predict_proba(reshaped_data)[:, 1]  
+    probabilities = classifier.predict_proba(reshaped_data)[:, 1]  # Get probabilities for the positive class
 
-   
+    # Reshape the probabilities back to the original raster shape
     prob_raster = probabilities.reshape(rows, cols)
 
     return prob_raster
     
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
+
+    """
+    Creates a DataFrame containing raster values and landslide presence/absence.
+    Returns: pandas.DataFrame: A DataFrame containing the raster values as features and a landslide column indicating the presence (1) or absence (0) of landslides
+    """
     # Flatten raster data into 1D arrays
     topo_flat = topo.flatten()
     geo_flat = geo.flatten()
@@ -119,17 +127,10 @@ def distance_from_fault(faults, shape):
     """
     Calculates the minimum distance from each pixel in the raster to the nearest fault.
 
-    Parameters:
-    faults (GeoDataFrame): A GeoPandas GeoDataFrame containing fault geometries.
-    shape (rasterio.io.DatasetReader): A rasterio dataset representing the raster grid.
 
     Returns:
     numpy.ndarray: A NumPy array representing the distance raster.
     """
-    # Ensure the shape object has a valid shape attribute
-    if not hasattr(shape, "shape"):
-        raise ValueError("The 'shape' parameter must have a 'shape' attribute.")
-
     # Create a binary mask for fault locations
     raster_shape = shape.shape
     fault_mask = features.rasterize(
