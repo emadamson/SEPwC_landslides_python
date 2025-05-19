@@ -30,6 +30,7 @@ def extract_values_from_raster(raster, shape_object):
     """
     coordinate_list = []
 
+
     # Extract coordinates from each shape
     for shape in shape_object:
         if hasattr(shape, "geometry"):  # If shape is a GeoPandas row
