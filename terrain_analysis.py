@@ -71,8 +71,35 @@ def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
     
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
+    # Flatten raster data into 1D arrays
+    topo_flat = topo.flatten()
+    geo_flat = geo.flatten()
+    lc_flat = lc.flatten()
+    dist_fault_flat = dist_fault.flatten()
+    slope_flat = slope.flatten()
 
-    return
+    # Create a DataFrame with raster values
+    data = pd.DataFrame({
+        "topography": topo_flat,
+        "geology": geo_flat,
+        "landcover": lc_flat,
+        "distance_to_fault": dist_fault_flat,
+        "slope": slope_flat
+    })
+
+    # Extract landslide presence/absence
+    raster_shape = topo.shape
+    landslide_raster = features.rasterize(
+        [(geom, 1) for geom in landslides.geometry],
+        out_shape=raster_shape,
+        transform=shape.affine,
+        fill=0,
+        dtype="int32"
+    )
+    data["landslide"] = landslide_raster.flatten()
+
+    return data
+    
 
 
 def main():
