@@ -101,7 +101,21 @@ def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
 
     return data
     
+def distance_from_fault(faults, shape):
+   
+    # Create a distance raster
+    distance_raster = np.zeros(shape.shape, dtype=np.float32)
 
+    # Iterate through each fault line and calculate distances
+    for _, fault in faults.iterrows():
+        fault_geom = fault.geometry
+        if fault_geom.is_empty:
+            continue
+        # Calculate distance from the fault line to each pixel
+        distances = shape.distance(fault_geom)
+        distance_raster = np.minimum(distance_raster, distances)
+
+    return distance_raster
 
 def main():
 
