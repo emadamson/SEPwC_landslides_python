@@ -3,9 +3,13 @@
 
 import pandas as pd
 import geopandas as gpd
+import numpy as np
 import rasterio
 from rasterio import features
 from sklearn.ensemble import RandomForestClassifier
+import argparse
+
+
 
 
 def convert_to_rasterio(raster_data, template_raster):
