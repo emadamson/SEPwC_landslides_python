@@ -55,11 +55,10 @@ def extract_values_from_raster(raster, shape_object):
 
     return current_values
 
-
 def make_classifier(x, y, verbose=False):
-    
-     """
-    Using random forest classifier
+    """
+    Trains a Random Forest classifier using the provided input features and labels.
+
     Returns:
     RandomForestClassifier: A trained Random Forest classifier that can be used for predictions.
     """
