@@ -23,19 +23,18 @@ class RasterData:
 
 
 def convert_to_rasterio(raster_data, template_raster):
-    """
-    Reads raster data from a template raster and updates the provided numpy array.
-
-    Returns:
-    numpy.ndarray: The updated numpy array containing the raster data.
-    """
-    # Read the first band of the template raster
-    band_data = template_raster.read(1)
-    
-    # Update the provided numpy array with the raster data
-    np.copyto(raster_data, band_data)
-    
-    return raster_data
+    """Convert a numpy array to a rasterio dataset using a template"""
+    profile = template_raster.profile.copy()
+    profile.update(
+        dtype=raster_data.dtype,
+        height=raster_data.shape[0],
+        width=raster_data.shape[1],
+        count=1,
+        compress='lzw'
+    )
+    with rasterio.open("temp_raster.tif", 'w', **profile) as dst:
+        dst.write(raster_data, 1)
+    return rasterio.open("temp_raster.tif")
 
 def extract_values_from_raster(raster, shape_object):
     """
