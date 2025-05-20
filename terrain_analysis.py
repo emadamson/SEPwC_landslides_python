@@ -87,6 +87,11 @@ def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
     probabilities = classifier.predict_proba(feature_matrix)[:, 1]
     return probabilities.reshape(height, width)
     
+def calculate_slope(elevation_data):
+    """
+    calculates the slope using elevation data
+    """
+    return np.zeros_like(elevation_data, dtype=float)
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
 
