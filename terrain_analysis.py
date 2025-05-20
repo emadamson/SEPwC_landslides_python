@@ -37,30 +37,18 @@ def convert_to_rasterio(raster_data, template_raster):
     return rasterio.open("temp_raster.tif")
 
 def extract_values_from_raster(raster, shape_object):
-    """
-    Extracts raster values at the coordinates of the given shapes.
-
-    Returns:
-    list: A list of raster values corresponding to the input shapes.
-    """
-    coordinate_list = []
-    # Extract coordinates from each shape
-    for shape in shape_object:
-        if hasattr(shape, "geometry"):  # If shape is a GeoPandas row
-            shape = shape.geometry
-        if shape.is_empty:
-            continue
-        # Get the coordinates of the shape's centroid (or use another method if needed)
-        x_coordinate, y_coordinate = shape.centroid.x, shape.centroid.y
-        coordinate_list.append((x_coordinate, y_coordinate))
-
-    # Sample raster values at the extracted coordinates
-    values = raster.sample(coordinate_list)
-
-    # Convert sampled values to a list
-    current_values = [value[0] for value in values]
-
-    return current_values
+    """Extract raster values at the locations of the provided geometries."""
+    values = []
+    for geom in shape_object:
+        x, y = (geom.x, geom.y) if isinstance(geom, shapely.geometry.Point) \
+            else (geom.centroid.x, geom.centroid.y)
+        x = max(raster.bounds.left, min(x, raster.bounds.right))
+        y = max(raster.bounds.bottom, min(y, raster.bounds.top))
+        row, col = raster.index(x, y)
+        row = max(0, min(row, raster.height - 1))
+        col = max(0, min(col, raster.width - 1))
+        values.append(raster.read(1)[row, col])
+    return values
 
 def make_classifier(x, y, verbose=False):
     """
