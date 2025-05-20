@@ -68,22 +68,24 @@ def make_classifier(x, y, verbose=False):
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
     """
     Generates a probability raster using input raster layers and a trained classifier.
-
-    Returns:
-    numpy.ndarray: A NumPy array representing the probability raster.
     """
-    # Stack all input raster layers into a single 2D array (features for the classifier)
-    stacked_data = np.stack([topo, geo, lc, dist_fault, slope], axis=-1)
-    rows, cols, bands = stacked_data.shape
-    reshaped_data = stacked_data.reshape(-1, bands)  # Reshape to (num_pixels, num_features)
-
-    # Predict probabilities using the classifier
-    probabilities = classifier.predict_proba(reshaped_data)[:, 1]  # Get probabilities for the positive class
-
-    # Reshape the probabilities back to the original raster shape
-    prob_raster = probabilities.reshape(rows, cols)
-
-    return prob_raster
+    """
+    Generates a probability raster using input raster layers and a trained classifier.
+    """
+    height, width = raster_data.topo.shape
+    arrs = [
+        layer.read(1).flatten()
+        for layer in [
+            raster_data.topo,
+            raster_data.fault_dist,
+            raster_data.slope,
+            raster_data.lc,
+            raster_data.geo
+        ]
+    ]
+    feature_matrix = np.column_stack(arrs)
+    probabilities = classifier.predict_proba(feature_matrix)[:, 1]
+    return probabilities.reshape(height, width)
     
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
