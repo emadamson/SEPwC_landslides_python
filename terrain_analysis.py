@@ -97,59 +97,42 @@ def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
 
     """
     Creates a DataFrame containing raster values and landslide presence/absence.
-    Returns: pandas.DataFrame: A DataFrame containing the raster values as features and a landslide column indicating the presence (1) or absence (0) of landslides
     """
-    # Flatten raster data into 1D arrays
-    topo_flat = topo.flatten()
-    geo_flat = geo.flatten()
-    lc_flat = lc.flatten()
-    dist_fault_flat = dist_fault.flatten()
-    slope_flat = slope.flatten()
-
-    # Create a DataFrame with raster values
-    data = pd.DataFrame({
-        "topography": topo_flat,
-        "geology": geo_flat,
-        "landcover": lc_flat,
-        "distance_to_fault": dist_fault_flat,
-        "slope": slope_flat
+    if isinstance(topo, RasterData):
+        raster_data, shape, landslides = topo, geo, lc
+    else:
+        raster_data = RasterData(
+            topo=topo, geo=geo, lc=lc, slope=slope, fault_dist=dist_fault
+        )
+    elev_values = extract_values_from_raster(raster_data.topo, shape)
+    fault_values = extract_values_from_raster(raster_data.fault_dist, shape)
+    slope_values = extract_values_from_raster(raster_data.slope, shape)
+    lc_values = extract_values_from_raster(raster_data.lc, shape)
+    geo_values = extract_values_from_raster(raster_data.geo, shape)
+    df = pd.DataFrame({
+        'elev': elev_values,
+        'fault': fault_values,
+        'slope': slope_values,
+        'LC': lc_values,
+        'Geol': geo_values,
+        'ls': [landslides] * len(shape)
     })
+    return gpd.GeoDataFrame(df)
 
-    # Extract landslide presence/absence
-    raster_shape = topo.shape
-    landslide_raster = features.rasterize(
-        [(geom, 1) for geom in landslides.geometry],
-        out_shape=raster_shape,
-        transform=shape.transform,
-        fill=0,
-        dtype="int32"
-    )
-    data["landslide"] = landslide_raster.flatten()
-
-    return data
     
 def distance_from_fault(faults, shape):
     """
     Calculates the minimum distance from each pixel in the raster to the nearest fault.
 
-
-    Returns:
-    numpy.ndarray: A NumPy array representing the distance raster.
     """
-    # Create a binary mask for fault locations
-    raster_shape = shape.shape
-    fault_mask = features.rasterize(
-        [(geom, 1) for geom in faults.geometry],
-        out_shape=raster_shape,
-        transform=shape.transform,
-        fill=0,
-        dtype="int32"
-    )
-
-    # Calculate the Euclidean distance transform
-    distance_raster = distance_transform_edt(fault_mask == 0)
-
-    return distance_raster
+ elevation = topo.read(1)
+    fault_dist = np.zeros_like(elevation)
+    for i in range(elevation.shape[0]):
+        for j in range(elevation.shape[1]):
+            x, y = topo.xy(i, j)
+            point = shapely.geometry.Point(x, y)
+            fault_dist[i, j] = min(point.distance(fault) for fault in faults.geometry)
+    return fault_dist, convert_to_rasterio(fault_dist, topo)
 
 
 def main():
