@@ -4,7 +4,7 @@
 import pandas as pd
 import geopandas as gpd
 import numpy as np
-import rasterio
+import rasterio 
 from rasterio import features
 from sklearn.ensemble import RandomForestClassifier
 import argparse
