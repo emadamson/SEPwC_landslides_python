@@ -53,13 +53,17 @@ def extract_values_from_raster(raster, shape_object):
 def make_classifier(x, y, verbose=False):
     """
     Trains a Random Forest classifier using the provided input features and labels.
-
-    Returns:
-    RandomForestClassifier: A trained Random Forest classifier that can be used for predictions.
     """
-    Random_Forest = RandomForestClassifier(verbose=verbose)
-    Random_Forest.fit(x, y)
-    return Random_Forest
+    train_features, test_features, train_target, test_target = train_test_split(
+        features, target, test_size=0.2, random_state=42 )
+    
+    classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+    classifier.fit(train_features, train_target)
+    if verbose:
+        print(f"Training accuracy: {classifier.score(train_features, train_target):.3f}")
+        print(f"Testing accuracy: {classifier.score(test_features, test_target):.3f}")
+    return classifier
+
 
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
     """
