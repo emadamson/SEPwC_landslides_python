@@ -1,17 +1,25 @@
 'insert copywrite here'
 
 
-import pandas as pd
-import geopandas as gpd
-import numpy as np
-import rasterio 
-from rasterio import features
-from sklearn.ensemble import RandomForestClassifier
+from dataclasses import dataclass
+from typing import List, Tuple
 import argparse
-import scipy
-from scipy.ndimage import distance_transform_edt
+import numpy as np
+import rasterio
+import geopandas as gpd
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+import shapely.geometry
 
-
+@dataclass
+class RasterData:
+    """Defining the class features ."""
+    topo: rasterio.DatasetReader
+    geo: rasterio.DatasetReader
+    lc: rasterio.DatasetReader
+    slope: rasterio.DatasetReader
+    fault_dist: rasterio.DatasetReader
 
 
 def convert_to_rasterio(raster_data, template_raster):
